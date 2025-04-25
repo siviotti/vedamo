@@ -11,7 +11,6 @@ import java.util.Objects;
  */
 public class Metadado {
 
-    private final String id;
     private final String nome;
     private final TipoValor tipoValor;
     private final String descricao;
@@ -26,8 +25,7 @@ public class Metadado {
     /**
      * Construtor da classe Metadado.
      *
-     * @param id          O identificador único de um metadado dentro de uma estrutura com vários metadados.
-     * @param nome        O nome do metadado no esquema "chave/valor" ou "name/value" que pode ser repedito dentro de uma estrutura.
+     * @param nome        O nome do metadado no esquema "chave/valor" ou "name/value" que pode ser repetido dentro de uma estrutura.
      * @param tipoValor   O tipo de valor do metadado que definirá regras sobre os valores possíveis.
      * @param tamanho     O tamanho (em quantidade de caracteres ou dígitos) do metadado
      * @param descricao   Texto informativo sobre do que se trata este metadado.
@@ -36,7 +34,6 @@ public class Metadado {
      */
     public Metadado(String id, String nome, TipoValor tipoValor, Integer tamanho, String descricao, boolean obrigatorio,
                     List<Metadado> filhos) {
-        this.id = Objects.requireNonNull(id, "O id não pode ser nulo");
         this.nome = Objects.requireNonNull(nome, "O nome não pode ser nulo");
         this.tipoValor = Objects.requireNonNull(tipoValor, "O tipoValor não pode ser nulo");
         this.descricao = Objects.requireNonNull(descricao, "A descricao não pode ser nula");
@@ -46,7 +43,7 @@ public class Metadado {
     }
 
     List<Metadado> criaFilhos(List<Metadado> filhos, TipoValor tipoValor){
-        if (TipoValor.ESTRUTURA.equals(tipoValor)) {
+        if (TipoValor.COMPLEXO.equals(tipoValor)) {
             Objects.requireNonNull(filhos, "Uma estrutura deve ter metadados 'filhos'");
             if (filhos.isEmpty()) {
                 return List.copyOf(filhos);
@@ -61,10 +58,6 @@ public class Metadado {
     }
     public List<Metadado> getFilhos() {
         return filhos;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getNome() {
@@ -92,29 +85,28 @@ public class Metadado {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Metadado metadado = (Metadado) o;
-        return obrigatorio == metadado.obrigatorio && Objects.equals(id, metadado.id) &&
-                Objects.equals(nome, metadado.nome) && tipoValor == metadado.tipoValor && Objects.equals(filhos, metadado.filhos) &&
+        return obrigatorio == metadado.obrigatorio && Objects.equals(nome, metadado.nome) &&
+                tipoValor == metadado.tipoValor && Objects.equals(filhos, metadado.filhos) &&
                 Objects.equals(descricao, metadado.descricao) && Objects.equals(tamanho, metadado.tamanho);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, tipoValor, descricao, obrigatorio, tamanho);
+        return Objects.hash(nome, tipoValor, descricao, obrigatorio, tamanho);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("id='").append(id).append('\'');
-        sb.append(", nome='").append(nome).append('\'');
+        sb.append("nome='").append(nome).append('\'');
         sb.append(", tipoValor=").append(tipoValor);
         sb.append(", descricao='").append(descricao).append('\'');
         sb.append(", obrigatorio=").append(obrigatorio);
         sb.append(", tamanho=").append(tamanho);
         if (!filhos.isEmpty()){
-            sb.append(", filhos=").append(filhos);
+            sb.append("\n");
+            sb.append(", filhos=[").append(filhos).append("]");
         }
-        sb.append("\n");
         return sb.toString();
     }
 
@@ -125,6 +117,31 @@ public class Metadado {
      */
     public boolean isEstrutura(){
         return ! filhos.isEmpty();
+    }
+
+    public String toJson(int level){
+        StringBuilder sb = new StringBuilder();
+        String ident = "  ".repeat(level);
+        sb.append("{\n");
+        sb.append(ident).append("  \"nome\": \"").append(nome).append("\",\n");
+        sb.append(ident).append("  \"tipoValor\": \"").append(tipoValor).append("\",\n");
+        sb.append(ident).append("  \"descricao\": \"").append(descricao).append("\",\n");
+        sb.append(ident).append("  \"obrigatorio\": ").append(obrigatorio).append(",\n");
+        sb.append(ident).append("  \"tamanho\": ").append(tamanho);
+        if (!filhos.isEmpty()){
+            sb.append(",\n").append(ident).append("  \"filhos\": [\n");
+            for (int i = 0; i < filhos.size(); i++) {
+                sb.append(ident).append("    ").append(filhos.get(i).toJson(level + 2));
+                if (i < filhos.size() - 1) {
+                    sb.append(",");
+                }
+                sb.append("\n");
+            }
+            sb.append(ident).append("  ]");
+        }
+        sb.append("\n").append(ident).append("}");
+        return sb.toString();
+
     }
 
 }

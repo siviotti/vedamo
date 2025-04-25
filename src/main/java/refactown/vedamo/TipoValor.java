@@ -19,7 +19,7 @@ public enum TipoValor {
     DATA(10, (texto) -> LocalDate.parse(texto, DateTimeFormatter.ofPattern("dd/MM/yyyy"))), // No formato dd/MM/yyyy
     HORA(8, (texto) -> LocalTime.parse(texto, DateTimeFormatter.ofPattern("HH:mm:ss"))), // No formato HH:mm:ss
     DATA_HORA(18, (texto) -> LocalDateTime.parse(texto, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))), // no formato dd/mm/yyyy HH:mm:ss
-    ESTRUTURA((texto) -> texto);
+    COMPLEXO((texto) -> texto);
 
     private final int tamanhoFixo;
     private final TipoValorParser<?> parser;
